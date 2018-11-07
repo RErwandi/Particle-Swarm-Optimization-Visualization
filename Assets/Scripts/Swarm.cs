@@ -25,28 +25,30 @@ public class Swarm : MonoBehaviour {
             best_fitness = fitness;
     }
 
-    public void UpdateVelocity(Swarm bestSwarm, float cognitiveRate, float socialRate, float bound, float duration)
+    public void UpdateVelocity(Swarm bestSwarm, float cognitiveRate, float socialRate, float bound, float duration, bool bestLog)
     {
         Vector3 nextPosition = transform.position;
+        float vCognitive;
+        float vSocial;
         for (int i = 0; i < 2; i++)
         {
             float r1 = Random.Range(0f, 1f);
             float r2 = Random.Range(0f, 1f);
+            
             if(i == 0)
             {
-                float vCognitive = cognitiveRate * r1 * (bestSwarm.transform.position.x - transform.position.x);
-                float sCognitive = socialRate * r2 * (bestSwarm.transform.position.x - transform.position.x);
-                nextPosition.x = transform.position.x + vCognitive + sCognitive;
+                vCognitive = cognitiveRate * r1 * (bestSwarm.transform.position.x - transform.position.x);
+                vSocial = socialRate * r2 * (bestSwarm.transform.position.x - transform.position.x);
+                nextPosition.x = transform.position.x + vCognitive + vSocial;
                 nextPosition.x = Mathf.Clamp(nextPosition.x, -bound, bound);
             } else
             {
-                float vCognitive = cognitiveRate * r1 * (bestSwarm.transform.position.z - transform.position.z);
-                float sCognitive = socialRate * r2 * (bestSwarm.transform.position.z - transform.position.z);
-                nextPosition.z = transform.position.z + vCognitive + sCognitive;
+                vCognitive = cognitiveRate * r1 * (bestSwarm.transform.position.z - transform.position.z);
+                vSocial = socialRate * r2 * (bestSwarm.transform.position.z - transform.position.z);
+                nextPosition.z = transform.position.z + vCognitive + vSocial;
                 nextPosition.z = Mathf.Clamp(nextPosition.z, -bound, bound);
             }
         }
-        
         transform.DOMoveX(nextPosition.x, duration);
         transform.DOMoveZ(nextPosition.z, duration);
     }

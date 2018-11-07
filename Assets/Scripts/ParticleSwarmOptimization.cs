@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class ParticleSwarmOptimization : MonoBehaviour {
 
@@ -16,26 +18,42 @@ public class ParticleSwarmOptimization : MonoBehaviour {
     public List<Swarm> swarms = new List<Swarm>();
     public Swarm bestSwarm;
     public float bestFitness = 0;
+    public TextMeshProUGUI infoText;
+    private GameObject startButton;
 
 	void Start () {
-		for(int i = 0; i < particleCount; i++)
+		
+	}
+
+	void Update () {
+		
+	}
+
+    public void StartPSO(GameObject startButton)
+    {
+        this.startButton = startButton;
+        this.startButton.SetActive(false);
+
+        foreach(Swarm s in swarms)
+        {
+            Destroy(s.gameObject);
+        }
+        swarms.Clear();
+
+        StartCoroutine(PSO());
+    }
+
+    IEnumerator PSO()
+    {
+        // Spawn particles randomly
+        for (int i = 0; i < particleCount; i++)
         {
             Vector3 randomPosition = new Vector3(Random.Range(-terrainSize, terrainSize), 0, Random.Range(-terrainSize, terrainSize));
             GameObject newSwarm = Instantiate(swarmPrefab, randomPosition, Quaternion.identity);
             swarms.Add(newSwarm.GetComponent<Swarm>());
         }
 
-        StartCoroutine(PSO());
-	}
-	
-
-	void Update () {
-		
-	}
-
-    IEnumerator PSO()
-    {
-        for(int i = 0; i < maxIteration; i++)
+        for (int i = 0; i < maxIteration; i++)
         {
             // Update All Swarms Fitness
             foreach (Swarm s in swarms)
@@ -53,10 +71,19 @@ public class ParticleSwarmOptimization : MonoBehaviour {
             // Move all Swarms
             foreach (Swarm s in swarms)
             {
-                s.UpdateVelocity(bestSwarm, cognitionRate, socialRate, terrainSize, durationIteration);
+                if(s != bestSwarm)
+                {
+                    s.UpdateVelocity(bestSwarm, cognitionRate, socialRate, terrainSize, durationIteration, false);
+                }
+                else
+                {
+                    s.UpdateVelocity(bestSwarm, cognitionRate, socialRate, terrainSize, durationIteration, true);
+                }
             }
+            infoText.text = "Iteration:" + i + "\nBest Fitness:" + bestFitness;
             yield return new WaitForSeconds(durationIteration);
         }
+        this.startButton.SetActive(true);
     }
 
     Swarm GetBestSwarm()
